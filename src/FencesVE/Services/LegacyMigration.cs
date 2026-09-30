@@ -132,14 +132,22 @@ public static class LegacyMigration
                 return;
             }
 
+            // Katalog pod nowa nazwa moze byc pozostaloscia z dawnych czasow, ze starszym
+            // ukladem niz ten, na ktorym uzytkownik pracowal ostatnio. Wtedy odkladamy go
+            // na bok (nic nie kasujemy) i bierzemy dane starej nazwy w calosci.
+            if (Directory.Exists(configDirectory) && IsLegacyLayoutNewer(legacy, configDirectory))
+            {
+                Directory.Move(configDirectory, $"{configDirectory}-poprzedni-{DateTime.Now:yyyyMMdd-HHmmss}");
+            }
+
             if (!Directory.Exists(configDirectory))
             {
                 Directory.Move(legacy, configDirectory);
                 return;
             }
 
-            // Nowy katalog juz jest (np. log awarii sprzed migracji) - dokladamy to, czego
-            // w nim brakuje, niczego nie nadpisujac.
+            // Nowy katalog juz jest i ma nowszy uklad (albo sam log awarii) - dokladamy to,
+            // czego w nim brakuje, niczego nie nadpisujac.
             MoveMissing(legacy, configDirectory);
             TryDeleteEmpty(legacy);
         }
@@ -148,6 +156,24 @@ public static class LegacyMigration
             // Nieudane przeniesienie nie moze zablokowac startu. Pozycje ze starego katalogu
             // zostaja przy swoich sciezkach i dalej dzialaja.
         }
+    }
+
+    /// <summary>
+    /// Czy uklad starej nazwy jest nowszy niz ten w katalogu nowej nazwy. Brak ukladu
+    /// w nowym katalogu tez sie liczy - wtedy lezy tam najwyzej log awarii.
+    /// </summary>
+    private static bool IsLegacyLayoutNewer(string legacy, string configDirectory)
+    {
+        var legacyLayout = Path.Combine(legacy, "layout.json");
+        var currentLayout = Path.Combine(configDirectory, "layout.json");
+
+        if (!File.Exists(legacyLayout))
+        {
+            return false;
+        }
+
+        return !File.Exists(currentLayout) ||
+               File.GetLastWriteTimeUtc(legacyLayout) > File.GetLastWriteTimeUtc(currentLayout);
     }
 
     private static void MoveMissing(string source, string target)
