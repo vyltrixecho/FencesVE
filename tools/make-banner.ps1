@@ -17,7 +17,7 @@
     sensownego progu i kadr scinal sześciokatowi spod. Przy zmianie zrodla trzeba
     zmierzyc granice od nowa (-Measure).
 
-    Wynik: src\OpenFences\Assets\VyltrixEcho.png
+    Wynik: src\FencesVE\Assets\VyltrixEcho.png
 
 .PARAMETER Measure
     Nie zapisuje pliku, tylko wypisuje profil jasnosci wierszy i kolumn w obszarze
@@ -50,7 +50,7 @@ if (-not $Source) {
 
 # $PSScriptRoot nie jest jeszcze ustawiony podczas obliczania wartosci domyslnych param().
 if (-not $OutPath) {
-    $OutPath = Join-Path $PSScriptRoot '..\src\OpenFences\Assets\VyltrixEcho.png'
+    $OutPath = Join-Path $PSScriptRoot '..\src\FencesVE\Assets\VyltrixEcho.png'
 }
 
 # Zmierzone granice lockupu w materiale zrodlowym: tresc siega y 48..143, x 54..347.

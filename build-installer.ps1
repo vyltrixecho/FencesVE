@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Buduje OpenFences w trybie Release i pakuje go w instalator .exe.
+    Buduje FencesVE w trybie Release i pakuje go w instalator .exe.
 
 .DESCRIPTION
     Publikuje aplikacje jako pojedynczy plik, odczytuje wersje z gotowego .exe,
@@ -18,10 +18,10 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $root       = $PSScriptRoot
-$project    = Join-Path $root 'src\OpenFences\OpenFences.csproj'
-$publishDir = Join-Path $root 'src\OpenFences\bin\Release\net10.0-windows\win-x64\publish'
-$exePath    = Join-Path $publishDir 'OpenFences.exe'
-$issPath    = Join-Path $root 'installer\OpenFences.iss'
+$project    = Join-Path $root 'src\FencesVE\FencesVE.csproj'
+$publishDir = Join-Path $root 'src\FencesVE\bin\Release\net10.0-windows\win-x64\publish'
+$exePath    = Join-Path $publishDir 'FencesVE.exe'
+$issPath    = Join-Path $root 'installer\FencesVE.iss'
 $distDir    = Join-Path $root 'dist'
 
 function Find-Iscc {
@@ -50,9 +50,9 @@ function Find-Iscc {
 
 # Publish nie nadpisze pliku, ktory trzyma dzialajaca aplikacja -
 # GenerateBundle konczy sie wtedy bledem dostepu i zostawia uszkodzony .exe.
-$running = Get-Process OpenFences -ErrorAction SilentlyContinue
+$running = Get-Process FencesVE -ErrorAction SilentlyContinue
 if ($running) {
-    Write-Host 'Zamykam dzialajaca instancje OpenFences...' -ForegroundColor Yellow
+    Write-Host 'Zamykam dzialajaca instancje FencesVE...' -ForegroundColor Yellow
     $running | Stop-Process -Force
     Start-Sleep -Milliseconds 800
 }
