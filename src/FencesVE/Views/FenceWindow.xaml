@@ -1,0 +1,358 @@
+<Window x:Class="FencesVE.Views.FenceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:v="clr-namespace:FencesVE.Views"
+        Title="FencesVE"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="False"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        AllowDrop="True"
+        MinWidth="2"
+        MinHeight="2"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+
+        <!-- Niewidoczne uchwyty do zmiany rozmiaru na krawedziach i w rogach. -->
+        <Style x:Key="ResizeThumbStyle" TargetType="Thumb">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border Background="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--
+            Pasek przewijania nie zabiera miejsca w ukladzie: lezy na zawartosci
+            i pojawia sie dopiero, gdy kursor jest nad fence'em.
+        -->
+        <Style x:Key="OverlayScrollBarStyle" TargetType="ScrollBar">
+            <Setter Property="Width" Value="7" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="{DynamicResource FenceSelectionBrush}"
+                                                    CornerRadius="3.5"
+                                                    Margin="1,0" />
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageDownCommand" Focusable="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Background="Transparent" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageUpCommand" Focusable="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Background="Transparent" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                        </Track>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OverlayScrollViewerStyle" TargetType="ScrollViewer">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollViewer">
+                        <Grid>
+                            <ScrollContentPresenter Margin="{TemplateBinding Padding}" />
+
+                            <ScrollBar x:Name="PART_VerticalScrollBar"
+                                       Style="{StaticResource OverlayScrollBarStyle}"
+                                       Orientation="Vertical"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,4,3,4"
+                                       Opacity="0"
+                                       Value="{TemplateBinding VerticalOffset}"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="PART_VerticalScrollBar"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1" Duration="0:0:0.15" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="PART_VerticalScrollBar"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.25" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Plaski przycisk menu w belce tytulu. -->
+        <Style x:Key="HeaderButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource FenceTextBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource FenceHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="FenceItemTemplate">
+            <Border Width="{Binding DataContext.CellWidth, RelativeSource={RelativeSource AncestorType=Window}}"
+                    Height="{Binding DataContext.CellHeight, RelativeSource={RelativeSource AncestorType=Window}}"
+                    Margin="2"
+                    Padding="2,4"
+                    CornerRadius="6"
+                    ToolTip="{Binding Path}"
+                    MouseLeftButtonDown="Item_MouseLeftButtonDown"
+                    MouseRightButtonUp="Item_MouseRightButtonUp">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource FenceHoverBrush}" />
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource FenceSelectionBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <StackPanel VerticalAlignment="Top">
+                    <Image Source="{Binding Icon}"
+                           Width="{Binding DataContext.IconSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                           Height="{Binding DataContext.IconSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                           HorizontalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Opacity" Value="1" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                                        <Setter Property="Opacity" Value="0.35" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                    <TextBlock Text="{Binding DisplayName}"
+                               Margin="0,4,0,0"
+                               FontSize="{Binding DataContext.LabelFontSize, RelativeSource={RelativeSource AncestorType=Window}}"
+                               MaxHeight="{Binding DataContext.LabelMaxHeight, RelativeSource={RelativeSource AncestorType=Window}}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis"
+                               Foreground="{Binding DataContext.TextBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                               Visibility="{Binding DataContext.LabelVisibility, RelativeSource={RelativeSource AncestorType=Window}}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="3" ShadowDepth="0" Opacity="0.6" Color="#000000" />
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+    </Window.Resources>
+
+    <Grid>
+
+        <!-- Tlo fence'a -->
+        <Border x:Name="RootBorder"
+                Background="{DynamicResource FenceBackgroundBrush}"
+                BorderBrush="{DynamicResource FenceBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                ClipToBounds="True">
+            <!--
+                ContentRoot dostaje przy przyklejaniu sztywny rozmiar pelnego fence'a.
+                Dzieki temu zwijanie do paska przy krawedzi tylko przycina zawartosc,
+                zamiast przebudowywac siatke ikon na kazdej klatce animacji.
+            -->
+            <!--
+                DockPanel, a nie Grid z wierszami: belka moze stac z kazdej z czterech
+                stron, a przy DockPanel jest to jedna wlasciwosc zamiast przestawiania
+                wierszy, kolumn i rozpietosci.
+            -->
+            <DockPanel x:Name="ContentRoot" LastChildFill="True">
+
+                <!-- Belka tytulu: przeciaganie, dwuklik = zwijanie, prawy klik = menu -->
+                <Border x:Name="HeaderBorder"
+                        DockPanel.Dock="Top"
+                        Background="{DynamicResource FenceHeaderBrush}"
+                        CornerRadius="9,9,0,0"
+                        Padding="10,0,6,0"
+                        MinHeight="28"
+                        MouseLeftButtonDown="Header_MouseLeftButtonDown"
+                        MouseRightButtonUp="Header_MouseRightButtonUp">
+                    <Grid>
+                        <!--
+                            Dwuklik w sama nazwe zmienia nazwe, a w reszte belki zwija fence.
+                            Stad osobna obsluga tutaj - zdarzenie belki dostaje juz Handled.
+                        -->
+                        <TextBlock x:Name="TitleText"
+                                   MouseLeftButtonDown="TitleText_MouseLeftButtonDown"
+                                   Text="{Binding Title}"
+                                   Margin="0,0,46,0"
+                                   FontSize="{Binding TitleFontSize}"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{Binding TextBrush}" />
+
+                        <TextBox x:Name="TitleEditor"
+                                 Margin="0,0,26,0"
+                                 Padding="2,0"
+                                 FontSize="{Binding TitleFontSize}"
+                                 FontWeight="SemiBold"
+                                 VerticalAlignment="Center"
+                                 Visibility="Collapsed"
+                                 Background="#22FFFFFF"
+                                 BorderThickness="0"
+                                 Foreground="{Binding TextBrush}"
+                                 CaretBrush="{Binding TextBrush}"
+                                 KeyDown="TitleEditor_KeyDown"
+                                 LostFocus="TitleEditor_LostFocus" />
+
+                        <StackPanel x:Name="HeaderButtons"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+
+                            <!-- Bez tego zablokowany fence po prostu nie reaguje na przeciaganie
+                                 i nie ma jak sie domyslic, dlaczego. -->
+                            <TextBlock x:Name="LockIndicator"
+                                       Text="&#xE72E;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="11"
+                                       Margin="0,0,6,0"
+                                       VerticalAlignment="Center"
+                                       Opacity="0.75"
+                                       Visibility="Collapsed"
+                                       Foreground="{Binding TextBrush}"
+                                       ToolTip="{v:Loc Fence_LockedTip}" />
+
+                            <Button x:Name="MenuButton"
+                                    Style="{StaticResource HeaderButtonStyle}"
+                                    VerticalAlignment="Center"
+                                    Content="&#x22EF;"
+                                    Click="MenuButton_Click" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Zawartosc: siatka ikon. Ostatnie dziecko DockPanelu, wiec bierze reszte miejsca. -->
+                <ScrollViewer x:Name="ContentScroll"
+                              Style="{StaticResource OverlayScrollViewerStyle}"
+                              Background="Transparent"
+                              Padding="6"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              MouseLeftButtonDown="Content_MouseLeftButtonDown"
+                              MouseRightButtonUp="Content_MouseRightButtonUp">
+                    <ItemsControl x:Name="ItemsHost"
+                                  ItemsSource="{Binding Items}"
+                                  ItemTemplate="{StaticResource FenceItemTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Pusty komunikat, gdy fence nie ma zawartosci -->
+        <TextBlock x:Name="EmptyHint"
+                   Text="{v:Loc Fence_DropHint}"
+                   Margin="0,18,0,0"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="11"
+                   Opacity="0.5"
+                   IsHitTestVisible="False"
+                   Foreground="{DynamicResource FenceTextBrush}"
+                   Visibility="Collapsed" />
+
+        <!-- Uchwyty zmiany rozmiaru -->
+        <Grid x:Name="ResizeGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="6" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="6" />
+            </Grid.ColumnDefinitions>
+
+            <Thumb Grid.Row="0" Grid.Column="0" Tag="NW" Cursor="SizeNWSE" Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+            <Thumb Grid.Row="0" Grid.Column="1" Tag="N"  Cursor="SizeNS"   Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+            <Thumb Grid.Row="0" Grid.Column="2" Tag="NE" Cursor="SizeNESW" Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+            <Thumb Grid.Row="1" Grid.Column="0" Tag="W"  Cursor="SizeWE"   Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+            <Thumb Grid.Row="1" Grid.Column="2" Tag="E"  Cursor="SizeWE"   Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+            <Thumb Grid.Row="2" Grid.Column="0" Tag="SW" Cursor="SizeNESW" Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+            <Thumb Grid.Row="2" Grid.Column="1" Tag="S"  Cursor="SizeNS"   Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+            <Thumb Grid.Row="2" Grid.Column="2" Tag="SE" Cursor="SizeNWSE" Style="{StaticResource ResizeThumbStyle}" DragDelta="Resize_DragDelta" DragCompleted="Resize_DragCompleted" />
+        </Grid>
+
+    </Grid>
+</Window>

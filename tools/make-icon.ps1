@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Generuje wielorozmiarowa ikone OpenFences (.ico).
+    Generuje wielorozmiarowa ikone FencesVE (.ico).
 
 .DESCRIPTION
     Rysuje koncept "Kafle": dwa zachodzace na siebie zaokraglone panele,
@@ -9,7 +9,7 @@
     Kazdy rozmiar jest rysowany w czterokrotnym powiekszeniu i dopiero potem
     zmniejszany dwuszescienne - rysowanie wprost w 16 px daje poszarpane krawedzie.
 
-    Wynik: src\OpenFences\Assets\OpenFences.ico (PNG w srodku, Vista+).
+    Wynik: src\FencesVE\Assets\FencesVE.ico (PNG w srodku, Vista+).
 
 .EXAMPLE
     .\tools\make-icon.ps1
@@ -26,7 +26,7 @@ Add-Type -AssemblyName System.Drawing
 
 # $PSScriptRoot nie jest jeszcze ustawiony podczas obliczania wartosci domyslnych param().
 if (-not $OutPath) {
-    $OutPath = Join-Path $PSScriptRoot '..\src\OpenFences\Assets\OpenFences.ico'
+    $OutPath = Join-Path $PSScriptRoot '..\src\FencesVE\Assets\FencesVE.ico'
 }
 
 # Paleta "Grafit" z propozycji ikon.

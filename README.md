@@ -1,6 +1,6 @@
-# OpenFences
+# FencesVE
 
-Darmowy odpowiednik [Stardock Fences](https://www.stardock.com/products/fences/) na Windows 11.
+Darmowy program do porzadkowania pulpitu w Windows 10 i 11.
 Porzadkuje pulpit w polprzezroczyste kontenery ("fence'y") z wlasna siatka ikon.
 
 C# + WPF, .NET 10. Bez zewnetrznych zaleznosci.
@@ -10,26 +10,34 @@ C# + WPF, .NET 10. Bez zewnetrznych zaleznosci.
 Jedna komenda w terminalu Windows:
 
 ```powershell
-irm https://raw.githubusercontent.com/vyltrixecho/OpenFences/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/vyltrixecho/FencesVE/main/install.ps1 | iex
 ```
 
 Skrypt pyta GitHuba o najnowsze wydanie, pobiera instalator, **sprawdza jego sume kontrolna
-SHA-256** i uruchamia instalacje. Bez uprawnien administratora - OpenFences instaluje sie
-w katalogu uzytkownika (`%LOCALAPPDATA%\Programs\OpenFences`).
+SHA-256** i uruchamia instalacje. Bez uprawnien administratora - FencesVE instaluje sie
+w katalogu uzytkownika (`%LOCALAPPDATA%\Programs\FencesVE`).
 
 Bez okien kreatora (potok nie przekazuje argumentow, wiec przez blok skryptu):
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/vyltrixecho/OpenFences/main/install.ps1))) -Silent
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/vyltrixecho/FencesVE/main/install.ps1))) -Silent
 ```
 
 Skrypt przyjmuje tez `-DownloadOnly` (tylko pobiera i weryfikuje) oraz `-Version v0.4.0`
 (konkretne wydanie zamiast najnowszego).
 
-Wolisz kliknac - **[pobierz instalator recznie](https://github.com/vyltrixecho/OpenFences/releases/latest)**.
+Wolisz kliknac - **[pobierz instalator recznie](https://github.com/vyltrixecho/FencesVE/releases/latest)**.
 
 Do uruchomienia potrzebny jest [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0);
 skrypt sprawdza jego obecnosc i mowi, czym go doinstalowac.
+
+### Przejscie z OpenFences
+
+FencesVE to ten sam program pod nowa nazwa. Instalator aktualizuje stara instalacje
+i sprzata jej pliki, a przy pierwszym starcie FencesVE sam przenosi uklad fence'ow,
+ustawienia i wciagniete pliki z `%APPDATA%\OpenFences` do `%APPDATA%\FencesVE`
+oraz przepisuje wpisy autostartu i menu pulpitu. Jesli stara wersja wciaz dziala,
+FencesVE najpierw pyta, czy ja zamknac.
 
 ## Jak to wyglada
 
@@ -85,13 +93,16 @@ Menu fence'a i okno ustawien:
 - Przenoszenie ikon miedzy fence'ami przeciagnieciem
 - Ikony z powloki Windows w wysokiej rozdzielczosci (jumbo 256 px), z cache
 - Menu pozycji: otworz, pokaz w Eksploratorze, wlasciwosci, wlasna nazwa, usun z fence'a
+- **Usuwanie ikon** - "Usun (do Kosza)" w menu pozycji albo klawisz Delete. Plik wciagniety
+  do fence'a trafia do Kosza (da sie go przywrocic), odnosnik do pliku lezacego gdzie indziej
+  znika tylko z fence'a - cudzego pliku FencesVE nie kasuje
 - Brakujace pliki zostaja wyszarzone zamiast zniknac po cichu
 - Pasek przewijania nie zabiera miejsca - lezy na zawartosci i pojawia sie dopiero
   przy najechaniu na fence. Kolko myszy dziala zawsze
 
 **Menu pulpitu**
 - Prawy przycisk na pustym pulpicie: "Nowy fence tutaj" (powstaje dokladnie pod kursorem)
-  i "Konfiguruj OpenFences"
+  i "Konfiguruj FencesVE"
 - Wpisy siedza w HKCU, bez uprawnien administratora; wlacza i wylacza je checkbox
   w Ustawieniach -> Zachowanie
 - Klikniecie trafia do *dzialajacej* instancji przez nazwany potok, wiec nie odpala
@@ -103,12 +114,12 @@ Menu fence'a i okno ustawien:
 - Kanal to zwykly JSON pod adresem HTTPS, ktory sam ustawiasz - GitHub Releases,
   wlasny serwer, cokolwiek
 - Parametr `--update` robi caly przebieg bez okien (pod harmonogram zadan),
-  a wynik ladzie w `%APPDATA%\OpenFences\update.log`
+  a wynik ladzie w `%APPDATA%\FencesVE\update.log`
 
 **Zasobnik systemowy**
 - Ikone w zasobniku mozna schowac (Ustawienia -> Zachowanie -> "Pokazuj ikone w zasobniku
-  systemowym"). Do ustawien prowadzi wtedy ponowne uruchomienie OpenFences (np. z menu Start)
-  albo "Konfiguruj OpenFences" w menu pulpitu
+  systemowym"). Do ustawien prowadzi wtedy ponowne uruchomienie FencesVE (np. z menu Start)
+  albo "Konfiguruj FencesVE" w menu pulpitu
 
 **Jezyk**
 - Polski i angielski, domyslnie za jezykiem Windows (Ustawienia -> Wyglad -> Jezyk)
@@ -146,7 +157,7 @@ wiec da sie ja odtworzyc i zmienic w jednym miejscu:
 
 Koncept "Kafle": dwa zachodzace na siebie zaokraglone panele, tylny polprzezroczysty,
 gradient grafitowy `#9FB3C6 -> #33424F`. Skrypt zapisuje
-`src\OpenFences\Assets\OpenFences.ico` z osmioma rozmiarami
+`src\FencesVE\Assets\FencesVE.ico` z osmioma rozmiarami
 (256, 64, 48, 40, 32, 24, 20, 16 px). Kazdy rozmiar rysowany jest w czterokrotnym
 powiekszeniu i dopiero potem zmniejszany dwuszescienne - rysowanie wprost w 16 px
 daje poszarpane krawedzie.
@@ -158,7 +169,7 @@ Ta sama ikona trafia w cztery miejsca:
 | Ikona pliku `.exe` | `<ApplicationIcon>` w csproj |
 | Zasobnik systemowy | osadzona w zestawie, ladowana w rozmiarze `SmallIconSize` |
 | Instalator | `SetupIconFile` w skrypcie Inno Setup |
-| Wpisy w menu pulpitu | `Icon` wskazuje na `OpenFences.exe,0` |
+| Wpisy w menu pulpitu | `Icon` wskazuje na `FencesVE.exe,0` |
 
 ## Banner w ustawieniach
 
@@ -166,14 +177,14 @@ Okno ustawien ma trzy odnosniki: banner Vyltrix Echo nad zakladkami, prowadzacy 
 `https://vyltrixecho.pl`, kod QR po prawej stronie tego samego paska oraz przycisk
 "Postaw kawe" w stopce - oba na `https://buycoffee.to/vyltrixecho`.
 
-Kod QR (`src\OpenFences\Assets\BuyCoffeeQr.png`) to 33 moduly plus otulina, czyli 41 modulow
+Kod QR (`src\FencesVE\Assets\BuyCoffeeQr.png`) to 33 moduly plus otulina, czyli 41 modulow
 na bok. Rysowany jest w 88 px, co daje niewiele ponad 2 px na modul - to dolna granica
 czytelnosci dla aparatu telefonu, wiec nie zmniejszac go dalej. Tlo pod nim musi zostac biale;
 ciemna otulina psuje odczyt, dlatego kafelek ma wlasne biale tlo zamiast grafitowego.
 
 Przycisk kawy to oficjalna grafika buycoffee.to
 (`https://buycoffee.to/static/img/share/share-button-primary--pl.png`, 351 x 92) wgrana
-do `src\OpenFences\Assets\BuyCoffee.png`. Lezy w zasobach, a nie jest ciagnieta z sieci -
+do `src\FencesVE\Assets\BuyCoffee.png`. Lezy w zasobach, a nie jest ciagnieta z sieci -
 okno ustawien ma wygladac tak samo bez internetu i nie odpytywac obcego serwera przy
 kazdym otwarciu. Zeby ja odswiezyc, wystarczy nadpisac ten plik nowa wersja spod tego adresu.
 
@@ -187,7 +198,7 @@ materialu zrodlowego:
 Material zrodlowy nie lezy w repozytorium - sciezke podaje sie przy wywolaniu albo raz
 ustawia w zmiennej srodowiskowej `VYLTRIX_BANNER_SOURCE`.
 
-Skrypt wycina `src\OpenFences\Assets\VyltrixEcho.png` (318 x 116) z reklamy
+Skrypt wycina `src\FencesVE\Assets\VyltrixEcho.png` (318 x 116) z reklamy
 1024 x 807 - lockup jest w niej okolo poltora raza wiekszy niz w osobnym pliku
 logo 384 x 256, wiec napis ma realne piksele zamiast powiekszonej papki.
 
@@ -275,7 +286,7 @@ Zeby ta sama rzecz nie lezala jednoczesnie na pulpicie i w fence'ie, przeciagnie
 z pulpitu na fence **przenosi go** do magazynu aplikacji:
 
 ```
-%APPDATA%\OpenFences\items\<id fence'a>\
+%APPDATA%\FencesVE\items\<id fence'a>\
 ```
 
 Plik lezacy gdziekolwiek indziej na dysku zostaje na swoim miejscu - fence trzyma wtedy
@@ -308,7 +319,7 @@ przez caly czas czekania na uprawnienia.
 
 ## Windows nie oddaje plikow z AppData
 
-Magazyn fence'ow siedzi w `%APPDATA%\OpenFences\items`, a Windows **odmawia przenoszenia
+Magazyn fence'ow siedzi w `%APPDATA%\FencesVE\items`, a Windows **odmawia przenoszenia
 i kopiowania plikow z katalogow AppData przez przeciaganie**. Upuszczenie na pulpicie konczy
 sie wtedy efektem `DragDropEffects.Copy` i niczym wiecej: plik nie pojawia sie nigdzie, blad
 sie nie pokazuje. Zmierzone tym samym oknem WPF i tym samym plikiem, tylko z roznych katalogow:
@@ -373,7 +384,7 @@ odswiezanych naraz nie wchodzi sobie w droge.
 
 ## Tlumaczenia
 
-Napisy siedza w `src\OpenFences\Resources\Strings.resx` (polski, jezyk neutralny)
+Napisy siedza w `src\FencesVE\Resources\Strings.resx` (polski, jezyk neutralny)
 i `Strings.en.resx` (angielski). W XAML odwoluje sie do nich rozszerzenie znacznikow:
 
 ```xml
@@ -399,7 +410,7 @@ Brakujacy klucz zwraca sam klucz, wiec dziura w tlumaczeniu widac w UI zamiast p
 Okna narzedziowe (ustawienia) chodza za **motywem aplikacji Windows**, a nie za
 ustawieniem "Motyw" z zakladki Wyglad - to drugie maluje fence'y na pulpicie i jest
 czyms innym niz chrom okien. Gdy Windows pracuje w trybie ciemnym, okno dostaje
-grafitowa palete z `src\OpenFences\Views\DarkTheme.xaml` oraz ciemna belke tytulu
+grafitowa palete z `src\FencesVE\Views\DarkTheme.xaml` oraz ciemna belke tytulu
 przez `DwmSetWindowAttribute`.
 
 Slownik podmienia cale `ControlTemplate`, a nie same kolory - domyslny motyw WPF
@@ -414,7 +425,7 @@ posrodku ciemnego pulpitu.
 Jedno menu jest poza zasiegiem tego slownika: **menu zasobnika**. `NotifyIcon` przyjmuje
 tylko menu WinForms, a WinForms nie idzie za motywem Windows - z ciemnego pulpitu wyskakiwal
 bialy prostokat. Maluje je wiec wlasny `ToolStripProfessionalRenderer`
-(`src\OpenFences\Views\DarkTrayMenu.cs`) z ta sama paleta co `DarkTheme.xaml`: tlo `#23272C`,
+(`src\FencesVE\Views\DarkTrayMenu.cs`) z ta sama paleta co `DarkTheme.xaml`: tlo `#23272C`,
 tekst `#E6E9ED`, podswietlenie `#363D45`. Kolor tekstu, strzalki podmenu i tlo calego okna
 trzeba nadpisac osobno - domyslny renderer maluje kazde z nich po swojemu.
 
@@ -453,7 +464,7 @@ Parametry wiersza polecen (uzywane tez przez menu pulpitu):
 | `--update` | Sprawdza i instaluje aktualizacje bez zadnych okien |
 
 Gdy aplikacja juz dziala, polecenie jest przekazywane do niej nazwanym potokiem
-(`OpenFences.Commands.v1`), a druga instancja konczy sie po cichu. Uruchomienie bez parametrow
+(`FencesVE.Commands.v1`), a druga instancja konczy sie po cichu. Uruchomienie bez parametrow
 dziala jak `--settings` - przy schowanej ikonie w zasobniku to najprostsza droga do ustawien.
 
 ### Windows 11 a menu kontekstowe
@@ -478,11 +489,11 @@ Remove-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905b
 Stop-Process -Name explorer -Force
 ```
 
-To ustawienie calego Eksploratora, a nie samego OpenFences - dlatego aplikacja go nie rusza.
+To ustawienie calego Eksploratora, a nie samego FencesVE - dlatego aplikacja go nie rusza.
 
 ## Gdzie siedzi konfiguracja
 
-`%APPDATA%\OpenFences\layout.json`
+`%APPDATA%\FencesVE\layout.json`
 
 Zwykly JSON - mozna go edytowac recznie albo skopiowac na inny komputer.
 Uszkodzony plik jest odkladany jako `layout.json.broken-<data>`, a aplikacja startuje
@@ -520,7 +531,7 @@ W Ustawieniach -> Aktualizacje podaj adres pliku JSON:
 ```json
 {
   "version": "0.3.0",
-  "url": "https://github.com/<user>/<repo>/releases/download/v0.3.0/OpenFences.exe",
+  "url": "https://github.com/<user>/<repo>/releases/download/v0.3.0/FencesVE.exe",
   "sha256": "6E25CF05877DCDD754100445...",
   "notes": "Co nowego w tej wersji"
 }
@@ -529,7 +540,7 @@ W Ustawieniach -> Aktualizacje podaj adres pliku JSON:
 Sume policzysz tak:
 
 ```powershell
-(Get-FileHash .\OpenFences.exe -Algorithm SHA256).Hash
+(Get-FileHash .\FencesVE.exe -Algorithm SHA256).Hash
 ```
 
 Zasady, ktorych updater pilnuje:
@@ -554,7 +565,7 @@ Zasady, ktorych updater pilnuje:
 ## Struktura
 
 ```
-src/OpenFences/
+src/FencesVE/
   Models/Models.cs           dane: fence, pozycja, regula, ustawienia
   Interop/NativeMethods.cs   cala warstwa P/Invoke
   Services/

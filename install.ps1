@@ -1,19 +1,19 @@
 <#
 .SYNOPSIS
-    Pobiera i instaluje najnowsze wydanie OpenFences.
+    Pobiera i instaluje najnowsze wydanie FencesVE.
 
 .DESCRIPTION
     Jedna komenda w terminalu Windows:
 
-        irm https://raw.githubusercontent.com/vyltrixecho/OpenFences/main/install.ps1 | iex
+        irm https://raw.githubusercontent.com/vyltrixecho/FencesVE/main/install.ps1 | iex
 
     Skrypt pyta GitHuba o najnowsze wydanie, pobiera instalator, sprawdza jego sume
     kontrolna SHA-256 i uruchamia instalacje. Nie wymaga uprawnien administratora -
-    OpenFences instaluje sie w katalogu uzytkownika.
+    FencesVE instaluje sie w katalogu uzytkownika.
 
     Z parametrami (potok nie przekazuje argumentow, wiec przez scriptblock):
 
-        & ([scriptblock]::Create((irm https://raw.githubusercontent.com/vyltrixecho/OpenFences/main/install.ps1))) -Silent
+        & ([scriptblock]::Create((irm https://raw.githubusercontent.com/vyltrixecho/FencesVE/main/install.ps1))) -Silent
 
 .PARAMETER Silent
     Instalacja bez okien kreatora.
@@ -34,7 +34,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$Repozytorium = 'vyltrixecho/OpenFences'
+$Repozytorium = 'vyltrixecho/FencesVE'
 $WymaganyRuntime = 'Microsoft.WindowsDesktop.App 10.'
 
 # Windows PowerShell 5.1 domyslnie probuje starych protokolow i odbija sie od GitHuba.
@@ -47,7 +47,7 @@ function Dobrze { param([string]$Tekst) Write-Host "    $Tekst" -ForegroundColor
 # ---- sprawdzenia wstepne ---------------------------------------------------
 
 if ([Environment]::Is64BitOperatingSystem -eq $false) {
-    throw 'OpenFences jest budowany tylko dla x64.'
+    throw 'FencesVE jest budowany tylko dla x64.'
 }
 
 Krok 'Sprawdzam srodowisko uruchomieniowe .NET'
@@ -63,10 +63,10 @@ if ($maRuntime) {
     Dobrze 'Jest .NET Desktop Runtime 10'
 }
 else {
-    Uwaga 'Nie widze .NET Desktop Runtime 10 - OpenFences bez niego nie wystartuje.'
+    Uwaga 'Nie widze .NET Desktop Runtime 10 - FencesVE bez niego nie wystartuje.'
     Uwaga 'Zainstalujesz go poleceniem:'
     Uwaga '    winget install Microsoft.DotNet.DesktopRuntime.10'
-    Uwaga 'Instalacja OpenFences leci dalej.'
+    Uwaga 'Instalacja FencesVE leci dalej.'
 }
 
 # ---- wydanie ---------------------------------------------------------------
@@ -78,7 +78,7 @@ $adres = if ($Version) {
 }
 
 Krok 'Pytam GitHuba o wydanie'
-$wydanie = Invoke-RestMethod -Uri $adres -Headers @{ 'User-Agent' = 'OpenFences-Installer' }
+$wydanie = Invoke-RestMethod -Uri $adres -Headers @{ 'User-Agent' = 'FencesVE-Installer' }
 Dobrze "$($wydanie.name) ($($wydanie.tag_name))"
 
 $instalator = $wydanie.assets | Where-Object { $_.name -like '*setup.exe' } | Select-Object -First 1
@@ -86,7 +86,7 @@ if (-not $instalator) { throw "Wydanie $($wydanie.tag_name) nie ma zalacznika z 
 
 # ---- pobieranie ------------------------------------------------------------
 
-$katalog = Join-Path ([IO.Path]::GetTempPath()) "OpenFences-$($wydanie.tag_name)"
+$katalog = Join-Path ([IO.Path]::GetTempPath()) "FencesVE-$($wydanie.tag_name)"
 New-Item -ItemType Directory -Force -Path $katalog | Out-Null
 $plik = Join-Path $katalog $instalator.name
 
@@ -148,7 +148,7 @@ if ($proces.ExitCode -ne 0) {
 
 Remove-Item $katalog -Recurse -Force -ErrorAction SilentlyContinue
 
-$zainstalowany = Join-Path $env:LOCALAPPDATA 'Programs\OpenFences\OpenFences.exe'
+$zainstalowany = Join-Path $env:LOCALAPPDATA 'Programs\FencesVE\FencesVE.exe'
 if (Test-Path $zainstalowany) {
     Dobrze "Zainstalowano: $zainstalowany"
     Dobrze "Wersja: $((Get-Item $zainstalowany).VersionInfo.FileVersion)"
