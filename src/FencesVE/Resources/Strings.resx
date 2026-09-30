@@ -267,9 +267,6 @@ Przeniesc?</value></data>
 
   <!-- komunikaty -->
   <data name="Msg_AlreadyRunning"><value>FencesVE juz dziala. Ikona aplikacji jest w zasobniku systemowym.</value></data>
-  <data name="Msg_LegacyRunning" xml:space="preserve"><value>Dziala jeszcze poprzednia wersja programu.
-
-Zamknac ja i przeniesc uklad fence'ow oraz ustawienia do FencesVE?</value></data>
   <data name="Msg_StartupFailed"><value>Nie udalo sie zmienic wpisu autostartu w rejestrze.</value></data>
   <data name="Msg_DesktopMenuFailed"><value>Nie udalo sie zmienic wpisow w menu pulpitu.</value></data>
   <data name="Msg_RulePatternRequired"><value>Podaj wzorzec dla reguly.</value></data>

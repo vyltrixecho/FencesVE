@@ -134,28 +134,7 @@ public partial class App : Application
         // Przed pierwszym oknem: styl musi byc w zasobach, zanim cokolwiek sie narysuje.
         SystemThemeService.ApplyToApplication();
 
-        // Dzialajaca poprzednia wersja trzyma swoj katalog i dalej zapisuje do niego
-        // uklad - przenosiny danych w tym czasie rozjechalyby obie kopie.
-        if (LegacyMigration.IsLegacyRunning())
-        {
-            var answer = MessageBox.Show(
-                Loc.Get("Msg_LegacyRunning"),
-                "FencesVE",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (answer != MessageBoxResult.Yes)
-            {
-                Shutdown();
-                return;
-            }
-
-            LegacyMigration.StopLegacy();
-        }
-
         var config = new ConfigService();
-        LegacyMigration.Run(config.ConfigDirectory);
-
         _manager = new FenceManager(config, new IconService());
 
         // Jezyk tez przed pierwszym oknem - napisy rozwiazuja sie przy wczytywaniu XAML.

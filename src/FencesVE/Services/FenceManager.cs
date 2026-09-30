@@ -74,12 +74,6 @@ public sealed class FenceManager
 
         _desktopClicks = new DesktopClickService(Dispatcher.CurrentDispatcher);
         _desktopClicks.DesktopDoubleClicked += ToggleFencesHidden;
-
-        // Uklad przeniesiony ze starej wersji wskazuje jeszcze na jej magazyn.
-        if (LegacyMigration.FixStoredPaths(Layout, config.ConfigDirectory))
-        {
-            RequestSave();
-        }
     }
 
     public IconService Icons { get; }

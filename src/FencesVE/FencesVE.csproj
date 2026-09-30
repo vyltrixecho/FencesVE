@@ -26,6 +26,11 @@
       To jest przede wszystkim aplikacja WPF - PerMonitorV2 w manifescie jest tu poprawne.
     -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <!--
+      Kompilator wpisuje do .exe sciezke pliku .pdb i sciezki zrodel - bez mapowania
+      w kazdym wydaniu lezalby pelny katalog projektu z dysku autora.
+    -->
+    <PathMap>$(MSBuildProjectDirectory)=src\FencesVE</PathMap>
   </PropertyGroup>
 
   <ItemGroup>
