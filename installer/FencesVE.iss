@@ -5,6 +5,8 @@
 #define AppPublisher "FencesVE"
 #define AppExeName   "FencesVE.exe"
 #define AppUrl       "https://github.com/vyltrixecho/FencesVE"
+; Poprzednia nazwa programu - tylko do sprzatania starej instalacji.
+#define LegacyName   "OpenFences"
 
 ; Wersje podaje build-installer.ps1 (/DAppVersion=...), tu jest tylko awaryjna wartosc.
 #ifndef AppVersion
@@ -14,7 +16,7 @@
 #define PublishDir "..\src\FencesVE\bin\Release\net10.0-windows\win-x64\publish"
 
 [Setup]
-; AppId zostaje po poprzedniej nazwie (OpenFences) - dzieki temu instalator FencesVE
+; AppId zostaje po poprzedniej nazwie - dzieki temu instalator FencesVE
 ; aktualizuje stara instalacje zamiast stawiac druga obok.
 AppId={{8F3A1C74-2D5B-4E96-9A1F-7C0B6E5D3A21}
 AppName={#AppName}
@@ -38,7 +40,7 @@ DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 DisableDirPage=no
-; Stara instalacja siedziala w katalogu OpenFences - nowa idzie pod wlasna nazwe,
+; Stara instalacja siedziala w katalogu pod poprzednia nazwa - nowa idzie pod wlasna nazwe,
 ; a stary katalog sprzata sekcja [InstallDelete].
 UsePreviousAppDir=no
 UsePreviousGroup=no
@@ -55,7 +57,7 @@ UninstallDisplayIcon={app}\{#AppExeName}
 SetupIconFile=..\src\FencesVE\Assets\FencesVE.ico
 
 ; Aplikacja siedzi w zasobniku - bez tego podmiana pliku by sie nie udala.
-AppMutex=FencesVE.SingleInstance,OpenFences.SingleInstance
+AppMutex=FencesVE.SingleInstance,{#LegacyName}.SingleInstance
 CloseApplications=yes
 
 [Languages]
@@ -71,14 +73,14 @@ Source: "{#PublishDir}\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion isreadme
 
 [InstallDelete]
-; Pozostalosci po wersji sprzed zmiany nazwy. Dane uzytkownika (%APPDATA%\OpenFences)
+; Pozostalosci po wersji sprzed zmiany nazwy. Dane uzytkownika z %APPDATA%
 ; przenosi sama aplikacja przy pierwszym starcie.
-Type: files; Name: "{autopf}\OpenFences\OpenFences.exe"
-Type: files; Name: "{autopf}\OpenFences\README.md"
-Type: files; Name: "{autopf}\OpenFences\unins*.*"
-Type: dirifempty; Name: "{autopf}\OpenFences"
-Type: filesandordirs; Name: "{autoprograms}\OpenFences"
-Type: files; Name: "{autodesktop}\OpenFences.lnk"
+Type: files; Name: "{autopf}\{#LegacyName}\{#LegacyName}.exe"
+Type: files; Name: "{autopf}\{#LegacyName}\README.md"
+Type: files; Name: "{autopf}\{#LegacyName}\unins*.*"
+Type: dirifempty; Name: "{autopf}\{#LegacyName}"
+Type: filesandordirs; Name: "{autoprograms}\{#LegacyName}"
+Type: files; Name: "{autodesktop}\{#LegacyName}.lnk"
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
@@ -98,9 +100,9 @@ Root: HKCU; Subkey: "Software\Classes\DesktopBackground\Shell\FencesVE.Settings"
 
 ; Wpisy wersji sprzed zmiany nazwy - wskazuja na plik, ktorego juz nie ma.
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; \
-    ValueName: "OpenFences"; Flags: deletevalue
-Root: HKCU; Subkey: "Software\Classes\DesktopBackground\Shell\OpenFences.NewFence"; ValueType: none; Flags: deletekey
-Root: HKCU; Subkey: "Software\Classes\DesktopBackground\Shell\OpenFences.Settings"; ValueType: none; Flags: deletekey
+    ValueName: "{#LegacyName}"; Flags: deletevalue
+Root: HKCU; Subkey: "Software\Classes\DesktopBackground\Shell\{#LegacyName}.NewFence"; ValueType: none; Flags: deletekey
+Root: HKCU; Subkey: "Software\Classes\DesktopBackground\Shell\{#LegacyName}.Settings"; ValueType: none; Flags: deletekey
 
 [Run]
 Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#AppName}}"; \
@@ -114,8 +116,8 @@ function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   ResultCode: Integer;
 begin
-  // OpenFences.exe - wersja sprzed zmiany nazwy, jej plik usuwa [InstallDelete].
-  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM {#AppExeName} /IM OpenFences.exe', '',
+  // Druga nazwa to wersja sprzed zmiany nazwy, jej plik usuwa [InstallDelete].
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM {#AppExeName} /IM {#LegacyName}.exe', '',
        SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Sleep(700);
   Result := '';

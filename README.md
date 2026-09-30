@@ -31,14 +31,6 @@ Wolisz kliknac - **[pobierz instalator recznie](https://github.com/vyltrixecho/F
 Do uruchomienia potrzebny jest [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0);
 skrypt sprawdza jego obecnosc i mowi, czym go doinstalowac.
 
-### Przejscie z OpenFences
-
-FencesVE to ten sam program pod nowa nazwa. Instalator aktualizuje stara instalacje
-i sprzata jej pliki, a przy pierwszym starcie FencesVE sam przenosi uklad fence'ow,
-ustawienia i wciagniete pliki z `%APPDATA%\OpenFences` do `%APPDATA%\FencesVE`
-oraz przepisuje wpisy autostartu i menu pulpitu. Jesli stara wersja wciaz dziala,
-FencesVE najpierw pyta, czy ja zamknac.
-
 ## Jak to wyglada
 
 Fence z zawartoscia - polprzezroczysty kontener z wlasna siatka ikon:

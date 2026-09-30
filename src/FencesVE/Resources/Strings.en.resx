@@ -246,7 +246,7 @@ Move it?</value></data>
   <data name="Tray_Exit" xml:space="preserve"><value>Exit</value></data>
   <data name="Tray_PickPortalFolder" xml:space="preserve"><value>Pick the folder the fence should mirror live</value></data>
   <data name="Msg_AlreadyRunning" xml:space="preserve"><value>FencesVE is already running. Its icon is in the system tray.</value></data>
-  <data name="Msg_LegacyRunning" xml:space="preserve"><value>The previous version of the program (OpenFences) is still running.
+  <data name="Msg_LegacyRunning" xml:space="preserve"><value>The previous version of the program is still running.
 
 Close it and move the fence layout and settings over to FencesVE?</value></data>
   <data name="Msg_StartupFailed" xml:space="preserve"><value>Could not change the startup entry in the registry.</value></data>

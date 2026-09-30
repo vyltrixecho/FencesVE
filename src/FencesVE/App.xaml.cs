@@ -134,7 +134,7 @@ public partial class App : Application
         // Przed pierwszym oknem: styl musi byc w zasobach, zanim cokolwiek sie narysuje.
         SystemThemeService.ApplyToApplication();
 
-        // Dzialajaca stara wersja (OpenFences) trzyma swoj katalog i dalej zapisuje do niego
+        // Dzialajaca poprzednia wersja trzyma swoj katalog i dalej zapisuje do niego
         // uklad - przenosiny danych w tym czasie rozjechalyby obie kopie.
         if (LegacyMigration.IsLegacyRunning())
         {

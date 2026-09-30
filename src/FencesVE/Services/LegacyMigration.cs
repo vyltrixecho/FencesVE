@@ -7,9 +7,9 @@ using Microsoft.Win32;
 namespace FencesVE.Services;
 
 /// <summary>
-/// Przejscie ze starej nazwy aplikacji (OpenFences) na FencesVE.
+/// Przejscie z poprzedniej nazwy aplikacji na FencesVE.
 /// <para>
-/// Stara wersja trzymala uklad i magazyn w <c>%APPDATA%\OpenFences</c>, a w rejestrze
+/// Stara wersja trzymala uklad i magazyn w <c>%APPDATA%\&lt;stara nazwa&gt;</c>, a w rejestrze
 /// wpis autostartu i menu pulpitu pod swoja nazwa. Bez przeniesienia tego wszystkiego
 /// FencesVE wystartowalby jak przy pierwszym uruchomieniu, a pliki wciagniete do fence'ow
 /// zostalyby w katalogu, do ktorego nic juz nie zaglada.
@@ -18,7 +18,7 @@ namespace FencesVE.Services;
 public static class LegacyMigration
 {
     private const string LegacyName = "OpenFences";
-    private const string LegacyMutex = "OpenFences.SingleInstance";
+    private const string LegacyMutex = LegacyName + ".SingleInstance";
 
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string ShellRoot = @"Software\Classes\DesktopBackground\Shell";
