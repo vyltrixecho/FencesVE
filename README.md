@@ -31,17 +31,17 @@ Wolisz kliknac - **[pobierz instalator recznie](https://github.com/vyltrixecho/F
 Do uruchomienia potrzebny jest [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0);
 skrypt sprawdza jego obecnosc i mowi, czym go doinstalowac.
 
-## Jak to wyglada
+## Jak wyglada FencesVE
 
 Fence z zawartoscia - polprzezroczysty kontener z wlasna siatka ikon:
 
-![Fence z zawartoscia](docs/screenshots/fence-programy.png)
+![FencesVE - panel Programy](docs/screenshots/fencesve-programy.png)
 
 Menu fence'a i okno ustawien:
 
 | | |
 |---|---|
-| ![Menu fence'a](docs/screenshots/menu-fence.png) | ![Ustawienia](docs/screenshots/ustawienia-wyglad.png) |
+| ![FencesVE - menu panelu](docs/screenshots/fencesve-menu.png) | ![FencesVE - ustawienia wygladu](docs/screenshots/fencesve-ustawienia-wyglad.png) |
 
 ## Co potrafi
 
