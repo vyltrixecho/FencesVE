@@ -139,8 +139,16 @@ if ($DownloadOnly) {
 # ---- instalacja ------------------------------------------------------------
 
 Krok 'Uruchamiam instalator'
-$argumenty = if ($Silent) { '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' } else { @() }
-$proces = Start-Process -FilePath $plik -ArgumentList $argumenty -PassThru -Wait
+# Pusta lista argumentow wywraca Start-Process w Windows PowerShell 5.1 (blad walidacji),
+# stad dwie galezie. Bez -Wait: w 5.1 czeka ono takze na procesy potomne, czyli na FencesVE
+# uruchomiony na koniec kreatora - skrypt wisialby az do jego zamkniecia.
+$proces = if ($Silent) {
+    Start-Process -FilePath $plik -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -PassThru
+} else {
+    Start-Process -FilePath $plik -PassThru
+}
+$null = $proces.Handle   # trzyma uchwyt - bez tego ExitCode po WaitForExit bywa pusty
+$proces.WaitForExit()
 
 if ($proces.ExitCode -ne 0) {
     throw "Instalator zakonczyl sie kodem $($proces.ExitCode)."
