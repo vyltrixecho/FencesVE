@@ -62,14 +62,38 @@ public sealed class IconService : IDisposable
             return;
         }
 
+        Enqueue(path, requestedSize, onLoaded, attempt: 0);
+    }
+
+    /// <summary>
+    /// Ile razy ponawiamy ikone, ktora wyszla pusta albo czarna. Zaraz po starcie Windows
+    /// powloka wypelnia liste obrazow w tle i przez kilka, kilkanascie sekund oddaje
+    /// puste sloty. Wczesniej taki czarny kwadrat trafial do cache i zostawal do restartu.
+    /// </summary>
+    private const int MaxAttempts = 8;
+
+    private void Enqueue(string path, int requestedSize, Action<ImageSource> onLoaded, int attempt)
+    {
+        if (_queue.IsAddingCompleted)
+        {
+            return;
+        }
+
         try
         {
             _queue.Add(() =>
             {
-                var icon = GetIcon(path, requestedSize);
+                var lastAttempt = attempt >= MaxAttempts - 1;
+                var icon = GetIcon(path, requestedSize, acceptBlank: lastAttempt);
                 if (icon is not null)
                 {
                     onLoaded(icon);
+                    return;
+                }
+
+                if (!lastAttempt)
+                {
+                    ScheduleRetry(path, requestedSize, onLoaded, attempt + 1);
                 }
             });
         }
@@ -79,8 +103,29 @@ public sealed class IconService : IDisposable
         }
     }
 
+    private void ScheduleRetry(string path, int requestedSize, Action<ImageSource> onLoaded, int attempt)
+    {
+        // 1 s, 2 s, 3 s... razem okolo pol minuty, z zapasem na wolny start systemu.
+        var delay = TimeSpan.FromSeconds(attempt);
+        System.Threading.Timer? timer = null;
+        timer = new System.Threading.Timer(_ =>
+        {
+            timer?.Dispose();
+            Enqueue(path, requestedSize, onLoaded, attempt);
+        }, null, delay, Timeout.InfiniteTimeSpan);
+    }
+
     private void ProcessQueue()
     {
+        try
+        {
+            NativeMethods.FileIconInit(true);
+        }
+        catch
+        {
+            // Brak eksportu nie blokuje ikon, najwyzej zostaje stare zachowanie.
+        }
+
         foreach (var job in _queue.GetConsumingEnumerable())
         {
             try
@@ -115,7 +160,7 @@ public sealed class IconService : IDisposable
         _cache.TryGetValue(CacheKey(path, requestedSize), out icon!);
 
     /// <summary>Zwraca ikone dla sciezki, korzystajac z cache. Wynik jest zamrozony (thread-safe).</summary>
-    public ImageSource? GetIcon(string path, int requestedSize)
+    public ImageSource? GetIcon(string path, int requestedSize, bool acceptBlank = true)
     {
         var listIndex = requestedSize > 48 ? NativeMethods.SHIL_JUMBO : NativeMethods.SHIL_EXTRALARGE;
         var key = CacheKey(path, requestedSize);
@@ -126,12 +171,74 @@ public sealed class IconService : IDisposable
         }
 
         var icon = LoadIcon(path, listIndex);
-        if (icon is not null)
+        if (icon is null)
         {
-            _cache[key] = icon;
+            return null;
         }
 
+        if (icon is BitmapSource bitmapIcon && LooksBlank(bitmapIcon))
+        {
+            // Nie zapisujemy w cache - przy nastepnej probie powloka zwykle ma juz ikone.
+            return acceptBlank ? icon : null;
+        }
+
+        _cache[key] = icon;
         return icon;
+    }
+
+    /// <summary>
+    /// Rozpoznaje niewypelniony slot listy obrazow: calkiem przezroczysty albo
+    /// jednolicie czarny kwadrat. Prawdziwa ikona ma przezroczyste brzegi albo kolor.
+    /// </summary>
+    private static bool LooksBlank(BitmapSource source)
+    {
+        try
+        {
+            var bitmap = source.Format == PixelFormats.Bgra32 || source.Format == PixelFormats.Pbgra32
+                ? source
+                : new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+
+            var width = bitmap.PixelWidth;
+            var height = bitmap.PixelHeight;
+            if (width == 0 || height == 0)
+            {
+                return true;
+            }
+
+            var stride = width * 4;
+            var pixels = new byte[stride * height];
+            bitmap.CopyPixels(pixels, stride, 0);
+
+            var visible = 0;
+            var opaque = 0;
+            for (var i = 0; i < pixels.Length; i += 4)
+            {
+                var alpha = pixels[i + 3];
+                if (alpha == 0)
+                {
+                    continue;
+                }
+
+                visible++;
+                if (alpha > 240)
+                {
+                    opaque++;
+                }
+
+                if (pixels[i] > 12 || pixels[i + 1] > 12 || pixels[i + 2] > 12)
+                {
+                    return false; // Jest jakis kolor - to prawdziwa ikona.
+                }
+            }
+
+            // Nic nie widac albo prawie caly kwadrat jest kryjaco czarny.
+            var total = width * height;
+            return visible == 0 || opaque > total * 0.9;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>Czysci cache, np. po zmianie rozmiaru ikon albo odswiezeniu zawartosci.</summary>

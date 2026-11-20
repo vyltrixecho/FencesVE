@@ -278,6 +278,15 @@ internal static class NativeMethods
     [DllImport("shell32.dll")]
     public static extern int SHGetImageList(int iImageList, ref Guid riid, out IImageList ppv);
 
+    /// <summary>
+    /// FileIconInit (shell32 #660). Procesy inne niz Explorer, ktore korzystaja z systemowej
+    /// listy obrazow, powinny ja tak zainicjalizowac, inaczej po starcie Windows lista
+    /// bywa niewypelniona i oddaje puste albo czarne kwadraty.
+    /// </summary>
+    [DllImport("shell32.dll", EntryPoint = "#660")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool FileIconInit([MarshalAs(UnmanagedType.Bool)] bool fRestoreCache);
+
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool DestroyIcon(IntPtr hIcon);
